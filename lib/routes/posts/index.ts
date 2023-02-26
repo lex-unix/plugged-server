@@ -10,6 +10,15 @@ interface PostRoute {
   }
 }
 
+interface CreatePostRoute {
+  Body: {
+    post: {
+      title: string
+      body: string
+    }
+  }
+}
+
 const posts: FastifyPluginCallback<Config> = (server, options, done) => {
   const model = postsModel(server.db)
 
@@ -39,6 +48,24 @@ const posts: FastifyPluginCallback<Config> = (server, options, done) => {
       }
 
       reply.code(404).send({ message: 'Post not found' })
+    }
+  })
+
+  server.route<CreatePostRoute>({
+    method: 'POST',
+    url: options.prefix + 'posts',
+    schema: schema.insert,
+    onRequest: async (req, reply) => {
+      if (!req.session.userId) {
+        reply.code(401).send({ message: 'You must be logged in' })
+      }
+    },
+    handler: async (req, reply) => {
+      const post = await model.createPost(req.session.userId, req.body.post)
+      reply.code(201)
+      return {
+        post
+      }
     }
   })
 

@@ -19,7 +19,17 @@ const getPost = {
   }
 }
 
+const insert = {
+  body: S.object().prop(
+    'post',
+    S.object()
+      .prop('title', S.string().required())
+      .prop('body', S.string().required())
+  )
+}
+
 export const schema = {
   getPosts,
-  getPost
+  getPost,
+  insert
 }

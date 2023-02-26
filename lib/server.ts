@@ -13,12 +13,10 @@ const plugin: FastifyPluginCallback<Config> = async (server, config, done) => {
     credentials: true
   })
 
-  /*
   server.register(autoload, {
     dir: path.join(__dirname, 'plugins'),
     options: config
   })
-  */
 
   server.register(autoload, {
     dir: path.join(__dirname, 'routes'),

@@ -5,6 +5,7 @@ const Post = S.object()
   .prop('title', S.string().required())
   .prop('body', S.string().required())
   .prop('username', S.string().required())
+  .prop('likes', S.string().required())
 
 const getPosts = {
   response: {

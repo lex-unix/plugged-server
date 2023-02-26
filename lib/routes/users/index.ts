@@ -12,6 +12,13 @@ interface RegisterRoute {
   }
 }
 
+interface LoginRoute {
+  Body: {
+    username: string
+    password: string
+  }
+}
+
 const users: FastifyPluginCallback<Config> = (server, options, done) => {
   const model = usersModel(server.db)
 
@@ -40,6 +47,28 @@ const users: FastifyPluginCallback<Config> = (server, options, done) => {
         }
       } catch (err) {
         server.log.error(err)
+      }
+    }
+  })
+
+  server.route<LoginRoute>({
+    method: 'POST',
+    url: options.prefix + 'users/login',
+    schema: schema.login,
+    handler: async (req, reply) => {
+      const { user } = await model.getUserByUsername(req.body.username)
+      if (!user) {
+        return reply.code(404).send({ message: 'Username not found' })
+      }
+
+      if (!(await argon2.verify(user.password, req.body.password))) {
+        return reply.code(401).send({ message: "Passwords don't match" })
+      }
+
+      req.session.userId = user.id
+
+      return {
+        user
       }
     }
   })

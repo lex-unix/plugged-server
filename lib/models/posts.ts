@@ -8,25 +8,41 @@ export interface PostBase {
 export interface Post extends PostBase {
   id: number
   likes: string
+  userId: string
   username: string
+}
+
+const mapPost = (post: Post) => {
+  const author = {
+    id: post.userId,
+    username: post.username
+  }
+
+  return {
+    id: post.id,
+    title: post.title,
+    body: post.body,
+    likes: post.likes,
+    author
+  }
 }
 
 export default function postsModel(db: Pool) {
   return {
     getPosts: async () => {
       const sql =
-        'SELECT p.id, p.title, p.body, u.username, COUNT(l.postId) as likes FROM Post p LEFT JOIN UserAccount u ON p.userId = u.id LEFT JOIN PostLike l ON p.id = l.postId GROUP BY p.id, u.username'
+        'SELECT p.id, p.title, p.body, u.id as "userId", u.username, COUNT(l.postId) as likes FROM Post p LEFT JOIN UserAccount u ON p.userId = u.id LEFT JOIN PostLike l ON p.id = l.postId GROUP BY p.id, u.id, u.username'
       const result = await db.query(sql)
       const posts = result.rows as Post[]
 
-      return posts
+      return posts.map(mapPost)
     },
     getPost: async (id: string) => {
       const sql =
-        'SELECT p.id, p.title, p.body, u.username, COUNT(l.postId) as likes FROM Post p LEFT JOIN UserAccount u ON p.userId = u.id LEFT JOIN PostLike l ON p.id = l.postId  WHERE p.id = $1 GROUP BY p.id, u.username'
+        'SELECT p.id, p.title, p.body, u.id as "userId", u.username, COUNT(l.postId) as likes FROM Post p LEFT JOIN UserAccount u ON p.userId = u.id LEFT JOIN PostLike l ON p.id = l.postId  WHERE p.id = $1 GROUP BY p.id, u.id, u.username'
       const result = await db.query(sql, [id])
-      const post = result.rows[0] as Post
-      return post
+      const post = result.rows.map(mapPost)
+      return post[0]
     },
     createPost: async (userId: number, post: PostBase) => {
       const sql =

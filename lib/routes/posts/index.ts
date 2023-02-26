@@ -69,6 +69,32 @@ const posts: FastifyPluginCallback<Config> = (server, options, done) => {
     }
   })
 
+  server.route<PostRoute>({
+    method: 'POST',
+    url: options.prefix + 'posts/:id/like',
+    onRequest: async (req, reply) => {
+      if (!req.session.userId) {
+        reply.code(401).send({ message: 'You must be logged in' })
+      }
+    },
+    handler: async req => {
+      await model.likePost(req.params.id, req.session.userId)
+    }
+  })
+
+  server.route<PostRoute>({
+    method: 'DELETE',
+    url: options.prefix + 'posts/:id/like',
+    onRequest: async (req, reply) => {
+      if (!req.session.userId) {
+        reply.code(401).send({ message: 'You must be logged in' })
+      }
+    },
+    handler: async req => {
+      await model.dislikePost(req.params.id, req.session.userId)
+    }
+  })
+
   done()
 }
 

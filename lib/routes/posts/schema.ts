@@ -9,6 +9,7 @@ const Post = S.object()
   .prop('title', S.string().required())
   .prop('body', S.string().required())
   .prop('likes', S.string().required())
+  .prop('liked', S.boolean().required())
   .prop('author', Profile)
 
 const getPosts = {

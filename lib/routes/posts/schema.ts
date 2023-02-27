@@ -31,7 +31,10 @@ const insert = {
     S.object()
       .prop('title', S.string().required())
       .prop('body', S.string().required())
-  )
+  ),
+  response: {
+    201: S.object().prop('post', Post)
+  }
 }
 
 export const schema = {

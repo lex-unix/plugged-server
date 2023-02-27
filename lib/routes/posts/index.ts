@@ -28,9 +28,7 @@ const posts: FastifyPluginCallback<Config> = (server, options, done) => {
     schema: schema.getPosts,
     handler: async () => {
       const posts = await model.getPosts()
-      return {
-        posts
-      }
+      return { posts }
     }
   })
 
@@ -42,9 +40,7 @@ const posts: FastifyPluginCallback<Config> = (server, options, done) => {
       const post = await model.getPost(req.params.id)
 
       if (post) {
-        return {
-          post
-        }
+        return { post }
       }
 
       reply.code(404).send({ message: 'Post not found' })
@@ -63,9 +59,7 @@ const posts: FastifyPluginCallback<Config> = (server, options, done) => {
     handler: async (req, reply) => {
       const post = await model.createPost(req.session.userId, req.body.post)
       reply.code(201)
-      return {
-        post
-      }
+      return { post }
     }
   })
 

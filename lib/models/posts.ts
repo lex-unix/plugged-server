@@ -31,28 +31,29 @@ const mapPost = (post: Post) => {
 
 export default function postsModel(db: Pool) {
   return {
-    getPosts: async () => {
+    getPosts: async function () {
       const sql =
         'SELECT p.id, p.title, p.body, u.id AS "userId", u.username, CASE WHEN l.userId IS NOT NULL THEN TRUE ELSE FALSE END AS liked, COUNT(l.postId) as likes FROM Post p LEFT JOIN UserAccount u ON p.userId = u.id LEFT JOIN PostLike l ON p.id = l.postId GROUP BY p.id, u.id, u.username, l.userId'
       const result = await db.query(sql)
       const posts = result.rows as Post[]
       return posts.map(mapPost)
     },
-    getPost: async (id: string) => {
+
+    getPost: async function (id: string) {
       const sql =
         'SELECT p.id, p.title, p.body, u.id AS "userId", u.username, CASE WHEN l.userId IS NOT NULL THEN TRUE ELSE FALSE END AS liked, COUNT(l.postId) as likes FROM Post p LEFT JOIN UserAccount u ON p.userId = u.id LEFT JOIN PostLike l ON p.id = l.postId  WHERE p.id = $1 GROUP BY p.id, u.id, u.username, l.userId'
       const result = await db.query(sql, [id])
-      const post = result.rows.map(mapPost)
-      return post[0]
+      return result.rows.map(mapPost)[0]
     },
-    createPost: async (userId: number, post: PostBase) => {
+
+    createPost: async function (userId: number, post: PostBase) {
       const sql =
-        'INSERT INTO Post (title, body, userId) VALUES ($1, $2, $3) RETURNING *'
+        'INSERT INTO Post (title, body, userId) VALUES ($1, $2, $3) RETURNING id'
       const result = await db.query(sql, [post.title, post.body, userId])
-      const createdPost = result.rows[0] as Post
-      return createdPost
+      return await this.getPost(result.rows[0].id)
     },
-    likePost: async (postId: string, userId: number) => {
+
+    likePost: async function (postId: string, userId: number) {
       let sql = 'SELECT userId from PostLike WHERE postId = $1 AND userId = $2'
       const liked = await db.query(sql, [postId, userId])
       if (!liked.rows.length) {
@@ -60,7 +61,8 @@ export default function postsModel(db: Pool) {
         await db.query(sql, [postId, userId])
       }
     },
-    dislikePost: async (postId: string, userId: number) => {
+
+    dislikePost: async function (postId: string, userId: number) {
       let sql = 'SELECT userId from PostLike WHERE postId = $1 AND userId = $2'
       const liked = await db.query(sql, [postId, userId])
       if (liked.rows.length) {

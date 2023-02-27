@@ -26,6 +26,12 @@ export default function usersModel(db: Pool) {
       return {
         user
       }
+    },
+
+    getUserById: async (id: number) => {
+      const sql = 'SELECT id, username FROM UserAccount WHERE id = $1'
+      const result = await db.query(sql, [id])
+      return result.rows[0] as User
     }
   }
 }

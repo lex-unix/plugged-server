@@ -1,6 +1,6 @@
 import S from 'fluent-json-schema'
 
-const Profile = S.object()
+export const Profile = S.object()
   .prop('id', S.number().required())
   .prop('username', S.string().required())
 

@@ -9,6 +9,7 @@ export interface Post extends PostBase {
   id: number
   likes: string
   liked: boolean
+  createdAt: string
   userId: string
   username: string
 }
@@ -25,6 +26,7 @@ const mapPost = (post: Post) => {
     body: post.body,
     likes: post.likes,
     liked: post.liked,
+    createdAt: post.createdAt,
     author
   }
 }
@@ -33,7 +35,7 @@ export default function postsModel(db: Pool) {
   return {
     getPosts: async function () {
       const sql =
-        'SELECT p.id, p.title, p.body, u.id AS "userId", u.username, CASE WHEN l.userId IS NOT NULL THEN TRUE ELSE FALSE END AS liked, COUNT(l.postId) as likes FROM Post p LEFT JOIN UserAccount u ON p.userId = u.id LEFT JOIN PostLike l ON p.id = l.postId GROUP BY p.id, u.id, u.username, l.userId'
+        'SELECT p.id, p.title, p.body, p.createdAt as "createdAt", u.id AS "userId", u.username, CASE WHEN l.userId IS NOT NULL THEN TRUE ELSE FALSE END AS liked, COUNT(l.postId) as likes FROM Post p LEFT JOIN UserAccount u ON p.userId = u.id LEFT JOIN PostLike l ON p.id = l.postId GROUP BY p.id, u.id, u.username, l.userId'
       const result = await db.query(sql)
       const posts = result.rows as Post[]
       return posts.map(mapPost)
@@ -41,7 +43,7 @@ export default function postsModel(db: Pool) {
 
     getPost: async function (id: string) {
       const sql =
-        'SELECT p.id, p.title, p.body, u.id AS "userId", u.username, CASE WHEN l.userId IS NOT NULL THEN TRUE ELSE FALSE END AS liked, COUNT(l.postId) as likes FROM Post p LEFT JOIN UserAccount u ON p.userId = u.id LEFT JOIN PostLike l ON p.id = l.postId  WHERE p.id = $1 GROUP BY p.id, u.id, u.username, l.userId'
+        'SELECT p.id, p.title, p.body, p.createdAt as "createdAt", u.id AS "userId", u.username, CASE WHEN l.userId IS NOT NULL THEN TRUE ELSE FALSE END AS liked, COUNT(l.postId) as likes FROM Post p LEFT JOIN UserAccount u ON p.userId = u.id LEFT JOIN PostLike l ON p.id = l.postId  WHERE p.id = $1 GROUP BY p.id, u.id, u.username, l.userId'
       const result = await db.query(sql, [id])
       return result.rows.map(mapPost)[0]
     },

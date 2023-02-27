@@ -39,12 +39,9 @@ const users: FastifyPluginCallback<Config> = (server, options, done) => {
       try {
         password = await argon2.hash(req.body.password)
         const { user } = await model.registerUser(req.body.username, password)
-
         req.session.userId = user.id
 
-        return {
-          user
-        }
+        return { user }
       } catch (err) {
         server.log.error(err)
       }
@@ -67,8 +64,19 @@ const users: FastifyPluginCallback<Config> = (server, options, done) => {
 
       req.session.userId = user.id
 
-      return {
-        user
+      return { user }
+    }
+  })
+
+  server.route({
+    method: 'POST',
+    url: options.prefix + 'users/logout',
+    handler: async (req, reply) => {
+      try {
+        await req.session.destroy()
+        reply.code(205)
+      } catch (err) {
+        server.log.error(err)
       }
     }
   })

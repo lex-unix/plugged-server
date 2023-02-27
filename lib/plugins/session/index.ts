@@ -16,6 +16,7 @@ const redisSession: FastifyPluginCallback<Config> = (server, config, done) => {
     }),
     cookieName: cookieName,
     secret: cookieSecret,
+    saveUninitialized: false,
     cookie: {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

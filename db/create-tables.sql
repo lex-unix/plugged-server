@@ -25,3 +25,15 @@ CREATE TABLE IF NOT EXISTS PostLike (
 
 ALTER TABLE PostLike ADD CONSTRAINT fk_PostLikeUserId FOREIGN KEY (userId) REFERENCES UserAccount (id);
 ALTER TABLE PostLike ADD CONSTRAINT fk_PostLikePostId FOREIGN KEY (postId) REFERENCES Post (id);
+
+CREATE TABLE IF NOT EXISTS Comment (
+  id        SERIAL,
+  body      TEXT NOT NULL,
+  createdAt TIMESTAMP NOT NULL DEFAULT now(),
+  userId    INTEGER NOT NULL,
+  postId    INTEGER NOT NULL
+);
+
+ALTER TABLE Comment ADD CONSTRAINT pk_Comment PRIMARY KEY (id);
+ALTER TABLE Comment ADD CONSTRAINT fk_CommentUserId FOREIGN KEY (userId) REFERENCES UserAccount (id);
+ALTER TABLE Comment ADD CONSTRAINT fk_CommentPostId FOREIGN KEY (postId) REFERENCES Post (id);

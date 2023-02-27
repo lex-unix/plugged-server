@@ -68,7 +68,7 @@ const posts: FastifyPluginCallback<Config> = (server, options, done) => {
     url: options.prefix + 'posts/:id/like',
     onRequest: async (req, reply) => {
       if (!req.session.userId) {
-        reply.code(401).send({ message: 'You must be logged in' })
+        return reply.code(401).send({ message: 'You must be logged in' })
       }
     },
     handler: async req => {
@@ -81,7 +81,7 @@ const posts: FastifyPluginCallback<Config> = (server, options, done) => {
     url: options.prefix + 'posts/:id/like',
     onRequest: async (req, reply) => {
       if (!req.session.userId) {
-        reply.code(401).send({ message: 'You must be logged in' })
+        return reply.code(401).send({ message: 'You must be logged in' })
       }
     },
     handler: async req => {

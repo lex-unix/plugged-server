@@ -43,7 +43,7 @@ export default function postsModel(db: Pool) {
 
     getPost: async function (id: string, userId: number) {
       const sql =
-        'SELECT p.id, p.title, p.body, p.createdAt as "createdAt", u.id AS "userId", u.username, CASE WHEN l.userId $1 THEN TRUE ELSE FALSE END AS liked, COUNT(l.postId) as likes FROM Post p LEFT JOIN UserAccount u ON p.userId = u.id LEFT JOIN PostLike l ON p.id = l.postId  WHERE p.id = $2 GROUP BY p.id, u.id, u.username, l.userId'
+        'SELECT p.id, p.title, p.body, p.createdAt as "createdAt", u.id AS "userId", u.username, CASE WHEN l.userId = $1 THEN TRUE ELSE FALSE END AS liked, COUNT(l.postId) as likes FROM Post p LEFT JOIN UserAccount u ON p.userId = u.id LEFT JOIN PostLike l ON p.id = l.postId  WHERE p.id = $2 GROUP BY p.id, u.id, u.username, l.userId'
       const result = await db.query(sql, [userId, id])
       return result.rows.map(mapPost)[0]
     },

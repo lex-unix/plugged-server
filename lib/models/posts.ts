@@ -36,7 +36,7 @@ export default function postsModel(db: Pool) {
     getPosts: async function (userId: number) {
       // temp solution; need revisit
       const sql =
-        'WITH cte_likes AS ( SELECT postid, COUNT(*) AS total_likes FROM postlike GROUP BY postid) SELECT p.id, p.title, p.body, p.createdAt as "createdAt", u.id as "userId", u.username, coalesce(l.total_likes, 0) AS likes, exists(SELECT * FROM postlike pl JOIN useraccount u ON u.id = pl.userid and pl.postid = p.id WHERE u.id = $1) AS liked, u.username FROM post p LEFT JOIN cte_likes l ON p.id = l.postid LEFT JOIN useraccount u ON u.id = p.userid ORDER BY p.createdAt DESC'
+        'WITH cte_likes AS ( SELECT postid, COUNT(*) AS total_likes FROM postlike GROUP BY postid) SELECT p.id, p.title, p.body, p.createdAt AS "createdAt", u.id AS "userId", u.username, coalesce(l.total_likes, 0) AS likes, EXISTS(SELECT * FROM postlike pl JOIN useraccount u ON u.id = pl.userid AND pl.postid = p.id WHERE u.id = $1) AS liked, u.username FROM post p LEFT JOIN cte_likes l ON p.id = l.postid LEFT JOIN useraccount u ON u.id = p.userid ORDER BY p.createdAt DESC'
       const result = await db.query(sql, [userId])
       const posts = result.rows as Post[]
       return posts.map(mapPost)
@@ -45,7 +45,7 @@ export default function postsModel(db: Pool) {
     getPost: async function (id: string, userId: number) {
       // temp solution; need revisit
       const sql =
-        'WITH cte_likes AS ( SELECT postid, COUNT(*) AS total_likes FROM postlike GROUP BY postid) SELECT p.id, p.title, p.body, p.createdAt as "createdAt", u.id as "userId", u.username, coalesce(l.total_likes, 0) AS likes, exists(SELECT * FROM postlike pl JOIN useraccount u ON u.id = pl.userid and pl.postid = p.id WHERE u.id = $1) AS liked, u.username FROM post p LEFT JOIN cte_likes l ON p.id = l.postid LEFT JOIN useraccount u ON u.id = p.userid WHERE p.id = $2'
+        'WITH cte_likes AS ( SELECT postid, COUNT(*) AS total_likes FROM postlike GROUP BY postid) SELECT p.id, p.title, p.body, p.createdAt AS "createdAt", u.id AS "userId", u.username, coalesce(l.total_likes, 0) AS likes, EXISTS(SELECT * FROM postlike pl JOIN useraccount u ON u.id = pl.userid AND pl.postid = p.id WHERE u.id = $1) AS liked, u.username FROM post p LEFT JOIN cte_likes l ON p.id = l.postid LEFT JOIN useraccount u ON u.id = p.userid WHERE p.id = $2'
       const result = await db.query(sql, [userId, id])
       return result.rows.map(mapPost)[0]
     },

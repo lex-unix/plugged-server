@@ -35,7 +35,7 @@ export default function postsModel(db: Pool) {
   return {
     getPosts: async function (userId: number) {
       const sql =
-        'SELECT p.id, p.title, p.body, p.createdAt as "createdAt", u.id AS "userId", u.username, CASE WHEN l.userId = $1 THEN TRUE ELSE FALSE END AS liked, COUNT(l.postId) as likes FROM Post p LEFT JOIN UserAccount u ON p.userId = u.id LEFT JOIN PostLike l ON p.id = l.postId GROUP BY p.id, u.id, u.username, l.userId ORDER BY p.createdAt DESC'
+        'SELECT p.id, p.title, p.body, p.createdAt as "createdAt", u.id AS "userId", u.username, CASE WHEN l.userId = $1 THEN TRUE ELSE FALSE END AS liked, COUNT(l.postId) as likes FROM Post p LEFT JOIN UserAccount u ON p.userId = u.id LEFT JOIN PostLike l ON l.postId = p.id AND l.userId = u.id GROUP BY p.id, u.id, u.username, l.userId ORDER BY p.createdAt DESC'
       const result = await db.query(sql, [userId])
       const posts = result.rows as Post[]
       return posts.map(mapPost)
@@ -43,7 +43,7 @@ export default function postsModel(db: Pool) {
 
     getPost: async function (id: string, userId: number) {
       const sql =
-        'SELECT p.id, p.title, p.body, p.createdAt as "createdAt", u.id AS "userId", u.username, CASE WHEN l.userId = $1 THEN TRUE ELSE FALSE END AS liked, COUNT(l.postId) as likes FROM Post p LEFT JOIN UserAccount u ON p.userId = u.id LEFT JOIN PostLike l ON p.id = l.postId  WHERE p.id = $2 GROUP BY p.id, u.id, u.username, l.userId'
+        'SELECT p.id, p.title, p.body, p.createdAt as "createdAt", u.id AS "userId", u.username, CASE WHEN l.userId = $1 THEN TRUE ELSE FALSE END AS liked, COUNT(l.postId) as likes FROM Post p LEFT JOIN UserAccount u ON p.userId = u.id LEFT JOIN PostLike l ON l.postId = p.id AND l.userId = u.id WHERE p.id = $2 GROUP BY p.id, u.id, u.username, l.userId'
       const result = await db.query(sql, [userId, id])
       return result.rows.map(mapPost)[0]
     },

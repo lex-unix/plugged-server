@@ -26,8 +26,8 @@ const posts: FastifyPluginCallback<Config> = (server, options, done) => {
     method: 'GET',
     url: options.prefix + 'posts',
     schema: schema.getPosts,
-    handler: async () => {
-      const posts = await model.getPosts()
+    handler: async req => {
+      const posts = await model.getPosts(req.session.userId)
       return { posts }
     }
   })
@@ -37,7 +37,7 @@ const posts: FastifyPluginCallback<Config> = (server, options, done) => {
     url: options.prefix + 'posts/:id',
     schema: schema.getPost,
     handler: async (req, reply) => {
-      const post = await model.getPost(req.params.id)
+      const post = await model.getPost(req.params.id, req.session.userId)
 
       if (post) {
         return { post }

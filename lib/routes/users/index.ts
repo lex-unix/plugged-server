@@ -86,7 +86,7 @@ const users: FastifyPluginCallback<Config> = (server, options, done) => {
     url: options.prefix + 'users/me',
     handler: async req => {
       if (!req.session.userId) {
-        return null
+        return { user: null }
       }
       const user = await model.getUserById(req.session.userId)
 

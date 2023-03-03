@@ -19,11 +19,11 @@ export function getConfig() {
   }
 
   const db: PoolConfig = {
-    host: process.env.DB_HOST,
-    port: parseInt(process.env.DB_PORT),
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
+    host: process.env.PGHOST,
+    port: parseInt(process.env.PGPORT),
+    user: process.env.PGUSER,
+    password: process.env.PGPASSWORD,
+    database: process.env.PGDATABASE
   }
 
   const listen: FastifyListenOptions = {

@@ -1,7 +1,7 @@
 import { type FastifyPluginCallback } from 'fastify'
 import { type Config } from '../../config/config'
 import fp from 'fastify-plugin'
-import { StorageClient } from '@supabase/storage-js'
+import { createClient } from '@supabase/supabase-js'
 
 const fastifyStorage: FastifyPluginCallback<Config> = (
   fastify,
@@ -10,11 +10,8 @@ const fastifyStorage: FastifyPluginCallback<Config> = (
 ) => {
   try {
     const { storage } = options
-    const client = new StorageClient(storage.url, {
-      apikey: storage.secret,
-      Authorization: `Bearer ${storage.secret}`
-    })
-    fastify.decorate('storage', client)
+    const client = createClient(storage.url, storage.secret)
+    fastify.decorate('storage', client.storage)
   } catch (err) {
     done(err as Error)
   }

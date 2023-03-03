@@ -31,9 +31,15 @@ export function getConfig() {
     port: parseInt(process.env.PORT)
   }
 
+  const storage = {
+    url: process.env.SUPABASE_URL,
+    secret: process.env.SUPABASE_SECRET
+  }
+
   return {
     server,
     db,
+    storage,
     listen,
     prefix: '/api',
     cookieName: process.env.COOKIE_NAME,

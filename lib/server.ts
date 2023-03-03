@@ -4,6 +4,7 @@ import autoload from '@fastify/autoload'
 import path from 'node:path'
 import cookie from '@fastify/cookie'
 import cors from '@fastify/cors'
+import multipart from '@fastify/multipart'
 import type { Config } from './config/config'
 
 const plugin: FastifyPluginCallback<Config> = async (server, config, done) => {
@@ -11,6 +12,9 @@ const plugin: FastifyPluginCallback<Config> = async (server, config, done) => {
   server.register(cors, {
     origin: config.corsOrigin,
     credentials: true
+  })
+  server.register(multipart, {
+    limits: { fileSize: 4000000 }
   })
 
   server.register(autoload, {

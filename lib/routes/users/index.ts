@@ -94,6 +94,44 @@ const users: FastifyPluginCallback<Config> = (server, options, done) => {
     }
   })
 
+  server.route({
+    method: 'POST',
+    url: options.prefix + 'users/upload',
+    handler: async (req, reply) => {
+      const data = await req.file()
+
+      if (!data) {
+        return reply.code(401).send({ message: 'File is not attached' })
+      }
+
+      const [type, subtype] = data.mimetype.split('/')
+      if (!type.startsWith('image')) {
+        return reply
+          .code(415)
+          .send({ message: `${subtype} files are not supported` })
+      }
+
+      const username = (req.query as any).username
+      const buffer = await data.toBuffer()
+      const { data: imageData, error } = await server.storage
+        .from('avatar')
+        .upload(`${username}/avatar.${subtype}`, buffer, {
+          contentType: data.mimetype,
+          upsert: true
+        })
+
+      if (!imageData || error) {
+        throw error
+      }
+
+      const { data: imageUrl } = server.storage
+        .from('avatar')
+        .getPublicUrl(imageData.path)
+
+      reply.code(201).send({ message: imageUrl.publicUrl })
+    }
+  })
+
   done()
 }
 

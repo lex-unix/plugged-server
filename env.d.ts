@@ -11,5 +11,7 @@ declare namespace NodeJS {
     DB_PASSWORD: string
     REDIS_URL: string
     CORS_ORIGIN: string
+    SUPABASE_URL: string
+    SUPABASE_SECRET: string
   }
 }

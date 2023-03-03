@@ -1,12 +1,18 @@
 CREATE TABLE IF NOT EXISTS UserAccount (
-  id       SERIAL,
-  username VARCHAR(64) NOT NULL,
-  password VARCHAR(256) NOT NULL
+  id        SERIAL,
+  username  VARCHAR(64) NOT NULL,
+  password  VARCHAR(256) NOT NULL,
+  firstname VARCHAR(64) NOT NULL,
+  lastname  VARCHAR NOT NULL,
+  email     VARCHAR(64) NOT NULL,
+  avatarUrl VARCHAR(256),
+  bio       TEXT
 );
 
 ALTER TABLE UserAccount ADD CONSTRAINT pk_UserAccount PRIMARY KEY (id);
 
 CREATE UNIQUE INDEX idx_UserAccountUsername ON UserAccount (username);
+CREATE UNIQUE INDEX idx_UserAccountEmail ON UserAccount (email);
 
 CREATE TABLE IF NOT EXISTS Post (
   id        SERIAL,

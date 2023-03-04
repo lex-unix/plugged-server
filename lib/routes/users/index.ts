@@ -7,8 +7,13 @@ import usersModel from '../../models/users'
 
 interface RegisterRoute {
   Body: {
-    username: string
-    password: string
+    user: {
+      username: string
+      password: string
+      firstname: string
+      lastname: string
+      email: string
+    }
   }
 }
 
@@ -16,6 +21,12 @@ interface LoginRoute {
   Body: {
     username: string
     password: string
+  }
+}
+
+interface UploadRoute {
+  Params: {
+    id: string
   }
 }
 
@@ -27,18 +38,29 @@ const users: FastifyPluginCallback<Config> = (server, options, done) => {
     url: options.prefix + 'users/register',
     schema: schema.register,
     handler: async (req, reply) => {
-      const { user: existingUser } = await model.getUserByUsername(
-        req.body.username
+      const usernameExists = await model.getUserByUsername(
+        req.body.user.username
       )
 
-      if (existingUser) {
-        return reply.code(409).send({ message: 'Username already taken' })
+      if (usernameExists) {
+        return reply
+          .code(409)
+          .send({ message: 'Username already taken', field: 'username' })
       }
 
-      let password: string
+      const emailExists = await model.getUserByEmail(req.body.user.email)
+
+      if (emailExists) {
+        return reply
+          .code(409)
+          .send({ message: 'Email already taken', field: 'email' })
+      }
+
+      let hash: string
       try {
-        password = await argon2.hash(req.body.password)
-        const { user } = await model.registerUser(req.body.username, password)
+        const { password } = req.body.user
+        hash = await argon2.hash(password)
+        const user = await model.registerUser(req.body.user, hash)
         req.session.userId = user.id
 
         return { user }
@@ -53,7 +75,7 @@ const users: FastifyPluginCallback<Config> = (server, options, done) => {
     url: options.prefix + 'users/login',
     schema: schema.login,
     handler: async (req, reply) => {
-      const { user } = await model.getUserByUsername(req.body.username)
+      const user = await model.getUserByUsername(req.body.username)
       if (!user) {
         return reply.code(404).send({ message: 'Username not found' })
       }
@@ -94,9 +116,9 @@ const users: FastifyPluginCallback<Config> = (server, options, done) => {
     }
   })
 
-  server.route({
+  server.route<UploadRoute>({
     method: 'POST',
-    url: options.prefix + 'users/upload',
+    url: options.prefix + 'users/upload/:id',
     handler: async (req, reply) => {
       const data = await req.file()
 
@@ -111,11 +133,10 @@ const users: FastifyPluginCallback<Config> = (server, options, done) => {
           .send({ message: `${subtype} files are not supported` })
       }
 
-      const username = (req.query as any).username
       const buffer = await data.toBuffer()
       const { data: imageData, error } = await server.storage
         .from('avatar')
-        .upload(`${username}/avatar.${subtype}`, buffer, {
+        .upload(`${req.params.id}/avatar.${subtype}`, buffer, {
           contentType: data.mimetype,
           upsert: true
         })
@@ -127,6 +148,8 @@ const users: FastifyPluginCallback<Config> = (server, options, done) => {
       const { data: imageUrl } = server.storage
         .from('avatar')
         .getPublicUrl(imageData.path)
+
+      await model.addUserAvatar(req.params.id, imageUrl.publicUrl)
 
       reply.code(201).send({ message: imageUrl.publicUrl })
     }

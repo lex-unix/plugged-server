@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS UserAccount (
   firstname VARCHAR(64) NOT NULL,
   lastname  VARCHAR NOT NULL,
   email     VARCHAR(64) NOT NULL,
-  avatarUrl VARCHAR(256),
+  avatar    VARCHAR(256),
   bio       TEXT
 );
 

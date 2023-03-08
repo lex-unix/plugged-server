@@ -38,8 +38,7 @@ export default function commentsModel(db: Pool) {
     },
 
     getComment: async function (commentId: number | string) {
-      const sql =
-        'SELECT c.id, c.body, c.createdAt as "createdAt", u.id as "userId", u.username FROM Comment c INNER JOIN UserAccount u ON c.userId = u.id WHERE c.id = $1'
+      const sql = `SELECT c.id, c.body, c.createdAt as "createdAt", u.id as "userId", u.username, CONCAT(u.firstname, ' ', u.lastname) as name, u.avatar FROM Comment c INNER JOIN UserAccount u ON c.userId = u.id WHERE c.id = $1`
       const result = await db.query(sql, [commentId])
       return result.rows.map(mapComment)[0]
     },

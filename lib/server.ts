@@ -28,6 +28,18 @@ const plugin: FastifyPluginCallback<Config> = async (server, config, done) => {
     options: config
   })
 
+  server.addHook('onRequest', async req => {
+    if (
+      req.headers['content-type'] === 'application/json' &&
+      req.headers['content-length'] === '0'
+    ) {
+      req.headers['content-type'] = 'empty'
+    }
+  })
+  server.addContentTypeParser('empty', (_request, _body, next) => {
+    next(null, {})
+  })
+
   done()
 }
 

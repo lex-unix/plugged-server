@@ -3,6 +3,8 @@ import S from 'fluent-json-schema'
 export const Profile = S.object()
   .prop('id', S.number().required())
   .prop('username', S.string().required())
+  .prop('name', S.string().required())
+  .prop('avatar', S.string().required())
 
 const Post = S.object()
   .prop('id', S.string().required())

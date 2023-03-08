@@ -9,12 +9,16 @@ interface Comment extends CommentBase {
   userId: number
   username: string
   createdAt: string
+  avatar: string
+  name: string
 }
 
 const mapComment = (comment: Comment) => {
   const author = {
     id: comment.userId,
-    username: comment.username
+    username: comment.username,
+    name: comment.name,
+    avatar: comment.avatar
   }
 
   return {
@@ -28,8 +32,7 @@ const mapComment = (comment: Comment) => {
 export default function commentsModel(db: Pool) {
   return {
     getComments: async function (postId: string) {
-      const sql =
-        'SELECT c.id, c.body, c.createdAt as "createdAt", u.id as "userId", u.username FROM Comment c INNER JOIN UserAccount u ON c.userId = u.id WHERE c.postId = $1'
+      const sql = `SELECT c.id, c.body, c.createdAt as "createdAt", u.id as "userId", u.username, CONCAT(u.firstname, ' ', u.lastname) as name, u.avatar FROM Comment c INNER JOIN UserAccount u ON c.userId = u.id WHERE c.postId = $1`
       const result = await db.query(sql, [postId])
       return result.rows.map(mapComment)
     },

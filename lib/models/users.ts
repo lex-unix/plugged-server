@@ -32,7 +32,7 @@ export default function usersModel(db: Pool) {
 
     getUserByUsername: async function (username: string) {
       const sql =
-        'SELECT id, username, password FROM UserAccount WHERE username = $1'
+        'SELECT id, username, password, firstname, lastname, email, avatar FROM UserAccount WHERE username = $1'
       const result = await db.query(sql, [username])
       return result.rows[0] as User
     },

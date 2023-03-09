@@ -36,7 +36,10 @@ const comments: FastifyPluginCallback<Config> = (server, options, done) => {
     url: options.prefix + 'posts/:slug/comments',
     schema: schema.get,
     handler: async req => {
-      const comments = await model.getComments((req.params as any).slug)
+      const comments = await model.getComments(
+        (req.params as any).slug,
+        req.session.userId
+      )
       return { comments }
     }
   })
@@ -65,6 +68,43 @@ const comments: FastifyPluginCallback<Config> = (server, options, done) => {
       reply.code(204)
     }
   })
+
+  server.route({
+    method: 'POST',
+    url: options.prefix + 'posts/:slug/comments/:id/like',
+    handler: async (req, reply) => {
+      await model.likeComment(req.session.userId, (req.params as any).id)
+      reply.code(201)
+    }
+  })
+
+  server.route({
+    method: 'DELETE',
+    url: options.prefix + 'posts/:slug/comments/:id/like',
+    handler: async (req, reply) => {
+      await model.dislikeComment(req.session.userId, (req.params as any).id)
+      reply.code(204)
+    }
+  })
+
+  server.route({
+    method: 'POST',
+    url: options.prefix + 'posts/:slug/comments/:id/save',
+    handler: async (req, reply) => {
+      await model.saveComment(req.session.userId, (req.params as any).id)
+      reply.code(201)
+    }
+  })
+
+  server.route({
+    method: 'DELETE',
+    url: options.prefix + 'posts/:slug/comments/:id/save',
+    handler: async (req, reply) => {
+      await model.unsaveComment(req.session.userId, (req.params as any).id)
+      reply.code(204)
+    }
+  })
+
   done()
 }
 

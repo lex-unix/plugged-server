@@ -4,7 +4,10 @@ import { Profile } from '../posts/schema'
 const Comment = S.object()
   .prop('id', S.number().required())
   .prop('body', S.string())
-  .prop('createdAt', S.string())
+  .prop('createdAt', S.string().required())
+  .prop('likes', S.number().required())
+  .prop('liked', S.boolean().required())
+  .prop('saved', S.boolean().required())
   .prop('author', Profile)
 
 const get = {

@@ -52,3 +52,19 @@ CREATE TABLE IF NOT EXISTS SavedPost (
 
 ALTER TABLE SavedPost ADD CONSTRAINT fk_SavePostUserId FOREIGN KEY (userId) REFERENCES UserAccount (id);
 ALTER TABLE SavedPost ADD CONSTRAINT fk_SavePostPostId FOREIGN KEY (postId) REFERENCES Post (id);
+
+CREATE TABLE IF NOT EXISTS CommentLike (
+  commentId INTEGER NOT NULL,
+  userId    INTEGER NOT NULL
+);
+
+ALTER TABLE CommentLike ADD CONSTRAINT fk_CommentLikeCommentId FOREIGN KEY (commentId) REFERENCES Comment (id);
+ALTER TABLE CommentLike ADD CONSTRAINT fk_CommentLikeUserId FOREIGN KEY (userId) REFERENCES UserAccount (id);
+
+CREATE TABLE IF NOT EXISTS SavedComment (
+  commentId INTEGER NOT NULL,
+  userId    INTEGER NOT NULL
+);
+
+ALTER TABLE SavedComment ADD CONSTRAINT fk_SavedCommentCommentId FOREIGN KEY (commentId) REFERENCES Comment (id);
+ALTER TABLE SavedComment ADD CONSTRAINT fk_SavedCommentUserId FOREIGN KEY (userId) REFERENCES UserAccount (id);

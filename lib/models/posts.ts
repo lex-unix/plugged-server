@@ -17,6 +17,7 @@ const mapPost = (post: any) => {
   delete post.username, delete post.name, delete post.avatar
 
   post.likes = parseInt(post.likes)
+  post.comments = parseInt(post.comments)
 
   return post
 }
@@ -28,15 +29,16 @@ export default function postsModel(db: Pool) {
   return {
     getPosts: async function (userId: number) {
       // temp solution; need revisit
-      const sql = `WITH cte_likes AS ( SELECT postid, COUNT(*) AS total_likes FROM postlike GROUP BY postid) SELECT ${postFileds}, ${userFields}, coalesce(l.total_likes, 0) AS likes, EXISTS(SELECT * FROM postlike pl JOIN useraccount u ON u.id = pl.userid AND pl.postid = p.id WHERE u.id = $1) AS liked, EXISTS(SELECT userId FROM SavedPost sp JOIN useraccount u on p.id = sp.postId AND u.id = sp.userId  WHERE u.id = $1) as saved FROM post p LEFT JOIN cte_likes l ON p.id = l.postid LEFT JOIN useraccount u ON u.id = p.userid ORDER BY p.createdAt DESC`
+      const sql = `WITH cte_likes AS ( SELECT postid, COUNT(*) AS total_likes FROM postlike GROUP BY postid), cte_comments AS (SELECT postId, COUNT(*) as total_comments FROM Comment GROUP BY postId) SELECT ${postFileds}, ${userFields}, coalesce(l.total_likes, 0) AS likes, coalesce(c.total_comments, 0) AS comments, EXISTS(SELECT * FROM postlike pl JOIN useraccount u ON u.id = pl.userid AND pl.postid = p.id WHERE u.id = $1) AS liked, EXISTS(SELECT userId FROM SavedPost sp JOIN useraccount u on p.id = sp.postId AND u.id = sp.userId  WHERE u.id = $1) as saved FROM post p LEFT JOIN cte_likes l ON p.id = l.postid LEFT JOIN cte_comments c ON p.id = c.postId LEFT JOIN useraccount u ON u.id = p.userid ORDER BY p.createdAt DESC`
       const result = await db.query(sql, [userId])
       const posts = result.rows
+      console.log(posts)
       return posts.map(mapPost)
     },
 
     getPost: async function (id: string, userId: number) {
       // temp solution; need revisit
-      const sql = `WITH cte_likes AS ( SELECT postid, COUNT(*) AS total_likes FROM postlike GROUP BY postid) SELECT ${postFileds}, ${userFields}, coalesce(l.total_likes, 0) AS likes, EXISTS(SELECT * FROM postlike pl JOIN useraccount u ON u.id = pl.userid AND pl.postid = p.id WHERE u.id = $1) AS liked, EXISTS(SELECT userId FROM SavedPost sp JOIN useraccount u on p.id = sp.postId AND u.id = sp.userId  WHERE u.id = $1) as saved FROM post p LEFT JOIN cte_likes l ON p.id = l.postid LEFT JOIN useraccount u ON u.id = p.userid WHERE p.id = $2`
+      const sql = `WITH cte_likes AS ( SELECT postid, COUNT(*) AS total_likes FROM postlike GROUP BY postid), cte_comments AS (SELECT postId, COUNT(*) as total_comments FROM Comment GROUP BY postId) SELECT ${postFileds}, ${userFields}, coalesce(l.total_likes, 0) AS likes, coalesce(c.total_comments, 0) as comments, EXISTS(SELECT * FROM postlike pl JOIN useraccount u ON u.id = pl.userid AND pl.postid = p.id WHERE u.id = $1) AS liked, EXISTS(SELECT userId FROM SavedPost sp JOIN useraccount u on p.id = sp.postId AND u.id = sp.userId  WHERE u.id = $1) as saved FROM post p LEFT JOIN cte_likes l ON p.id = l.postid LEFT JOIN cte_comments c ON p.id = c.postId LEFT JOIN useraccount u ON u.id = p.userid WHERE p.id = $2`
       const result = await db.query(sql, [userId, id])
       return result.rows.map(mapPost)[0]
     },
@@ -46,6 +48,11 @@ export default function postsModel(db: Pool) {
         'INSERT INTO Post (title, body, userId) VALUES ($1, $2, $3) RETURNING id'
       const result = await db.query(sql, [post.title, post.body, userId])
       return await this.getPost(result.rows[0].id, userId)
+    },
+
+    deletePost: async function (postId: string) {
+      const sql = `DELETE FROM Post WHERE id = $1`
+      await db.query(sql, [postId])
     },
 
     likePost: async function (postId: string, userId: number) {

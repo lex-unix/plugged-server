@@ -14,6 +14,7 @@ const Post = S.object()
   .prop('liked', S.boolean().required())
   .prop('saved', S.boolean().required())
   .prop('createdAt', S.string().required())
+  .prop('comments', S.number().required())
   .prop('author', Profile)
 
 const getPosts = {

@@ -19,6 +19,12 @@ interface CreatePostRoute {
   }
 }
 
+interface DeletePostRoute {
+  Params: {
+    id: string
+  }
+}
+
 const posts: FastifyPluginCallback<Config> = (server, options, done) => {
   const model = postsModel(server.db)
 
@@ -60,6 +66,19 @@ const posts: FastifyPluginCallback<Config> = (server, options, done) => {
       const post = await model.createPost(req.session.userId, req.body.post)
       reply.code(201)
       return { post }
+    }
+  })
+
+  server.route<DeletePostRoute>({
+    method: 'DELETE',
+    url: options.prefix + 'posts/:id',
+    handler: async (req, reply) => {
+      const id = req.params.id
+      const post = await model.getPost(id, req.session.userId)
+      if (!post) {
+        return reply.code(404).send({ message: 'Post not found' })
+      }
+      await model.deletePost(id)
     }
   })
 

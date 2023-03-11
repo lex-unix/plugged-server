@@ -30,7 +30,7 @@ const login = {
     .prop('password', S.string().required()),
   response: {
     200: S.object().prop('user', User),
-    '4xx': S.object().prop('message', S.string())
+    '4xx': S.object().prop('message', S.string()).prop('field', S.string())
   }
 }
 

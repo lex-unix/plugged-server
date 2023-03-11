@@ -77,11 +77,15 @@ const users: FastifyPluginCallback<Config> = (server, options, done) => {
     handler: async (req, reply) => {
       const user = await model.getUserByUsername(req.body.username)
       if (!user) {
-        return reply.code(404).send({ message: 'Username not found' })
+        return reply
+          .code(404)
+          .send({ message: 'Username not found', field: 'username' })
       }
 
       if (!(await argon2.verify(user.password, req.body.password))) {
-        return reply.code(401).send({ message: "Passwords don't match" })
+        return reply
+          .code(401)
+          .send({ message: "Passwords don't match", field: 'password' })
       }
 
       req.session.userId = user.id

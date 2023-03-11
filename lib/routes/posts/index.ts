@@ -3,27 +3,13 @@ import fp from 'fastify-plugin'
 import postsModel from '../../models/posts'
 import { type Config } from '../../config/config'
 import { schema } from './schema'
-
-interface PostRoute {
-  Params: {
-    id: string
-  }
-}
-
-interface CreatePostRoute {
-  Body: {
-    post: {
-      title: string
-      body: string
-    }
-  }
-}
-
-interface DeletePostRoute {
-  Params: {
-    id: string
-  }
-}
+import type {
+  GetPostRoute,
+  CreatePostRoute,
+  DeletePostRoute,
+  LikePostRoute,
+  SavePostRoute
+} from './types'
 
 const posts: FastifyPluginCallback<Config> = (server, options, done) => {
   const model = postsModel(server.db)
@@ -38,7 +24,7 @@ const posts: FastifyPluginCallback<Config> = (server, options, done) => {
     }
   })
 
-  server.route<PostRoute>({
+  server.route<GetPostRoute>({
     method: 'GET',
     url: options.prefix + 'posts/:id',
     schema: schema.getPost,
@@ -82,7 +68,7 @@ const posts: FastifyPluginCallback<Config> = (server, options, done) => {
     }
   })
 
-  server.route<PostRoute>({
+  server.route<LikePostRoute>({
     method: 'POST',
     url: options.prefix + 'posts/:id/like',
     onRequest: async (req, reply) => {
@@ -95,7 +81,7 @@ const posts: FastifyPluginCallback<Config> = (server, options, done) => {
     }
   })
 
-  server.route<PostRoute>({
+  server.route<LikePostRoute>({
     method: 'DELETE',
     url: options.prefix + 'posts/:id/like',
     onRequest: async (req, reply) => {
@@ -108,7 +94,7 @@ const posts: FastifyPluginCallback<Config> = (server, options, done) => {
     }
   })
 
-  server.route<PostRoute>({
+  server.route<SavePostRoute>({
     method: 'POST',
     url: options.prefix + 'posts/:id/save',
     onRequest: async (req, reply) => {
@@ -122,7 +108,7 @@ const posts: FastifyPluginCallback<Config> = (server, options, done) => {
     }
   })
 
-  server.route<PostRoute>({
+  server.route<SavePostRoute>({
     method: 'DELETE',
     url: options.prefix + 'posts/:id/save',
     onRequest: async (req, reply) => {

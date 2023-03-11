@@ -3,30 +3,13 @@ import type { Config } from '../../config/config'
 import fp from 'fastify-plugin'
 import commentsModel from '../../models/comments'
 import { schema } from './schema'
-
-interface Params {
-  slug: string
-}
-interface ParamsWithId extends Params {
-  id: string
-}
-
-interface GetCommentsRoute {
-  Params: Params
-}
-
-interface CreateCommentRoute {
-  Params: Params
-  Body: {
-    comment: {
-      body: string
-    }
-  }
-}
-
-interface DeleteCommentRoute {
-  Params: ParamsWithId
-}
+import type {
+  GetCommentsRoute,
+  CreateCommentRoute,
+  DeleteCommentRoute,
+  LikeCommentRoute,
+  SaveCommentRoute
+} from './types'
 
 const comments: FastifyPluginCallback<Config> = (server, options, done) => {
   const model = commentsModel(server.db)
@@ -37,7 +20,7 @@ const comments: FastifyPluginCallback<Config> = (server, options, done) => {
     schema: schema.get,
     handler: async req => {
       const comments = await model.getComments(
-        (req.params as any).slug,
+        req.params.slug,
         req.session.userId
       )
       return { comments }
@@ -69,38 +52,38 @@ const comments: FastifyPluginCallback<Config> = (server, options, done) => {
     }
   })
 
-  server.route({
+  server.route<LikeCommentRoute>({
     method: 'POST',
     url: options.prefix + 'posts/:slug/comments/:id/like',
     handler: async (req, reply) => {
-      await model.likeComment(req.session.userId, (req.params as any).id)
+      await model.likeComment(req.session.userId, req.params.id)
       reply.code(201)
     }
   })
 
-  server.route({
+  server.route<LikeCommentRoute>({
     method: 'DELETE',
     url: options.prefix + 'posts/:slug/comments/:id/like',
     handler: async (req, reply) => {
-      await model.dislikeComment(req.session.userId, (req.params as any).id)
+      await model.dislikeComment(req.session.userId, req.params.id)
       reply.code(204)
     }
   })
 
-  server.route({
+  server.route<SaveCommentRoute>({
     method: 'POST',
     url: options.prefix + 'posts/:slug/comments/:id/save',
     handler: async (req, reply) => {
-      await model.saveComment(req.session.userId, (req.params as any).id)
+      await model.saveComment(req.session.userId, req.params.id)
       reply.code(201)
     }
   })
 
-  server.route({
+  server.route<SaveCommentRoute>({
     method: 'DELETE',
     url: options.prefix + 'posts/:slug/comments/:id/save',
     handler: async (req, reply) => {
-      await model.unsaveComment(req.session.userId, (req.params as any).id)
+      await model.unsaveComment(req.session.userId, req.params.id)
       reply.code(204)
     }
   })

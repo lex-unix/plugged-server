@@ -4,31 +4,7 @@ import { schema } from './schema'
 import fp from 'fastify-plugin'
 import * as argon2 from 'argon2'
 import usersModel from '../../models/users'
-
-interface RegisterRoute {
-  Body: {
-    user: {
-      username: string
-      password: string
-      firstname: string
-      lastname: string
-      email: string
-    }
-  }
-}
-
-interface LoginRoute {
-  Body: {
-    username: string
-    password: string
-  }
-}
-
-interface UploadRoute {
-  Params: {
-    id: string
-  }
-}
+import type { RegisterRoute, LoginRoute, UploadRoute } from './types'
 
 const users: FastifyPluginCallback<Config> = (server, options, done) => {
   const model = usersModel(server.db)

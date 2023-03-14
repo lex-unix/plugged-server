@@ -29,7 +29,7 @@ export default function postsModel(db: Pool) {
   return {
     getPosts: async function (userId: number) {
       // temp solution; need revisit
-      const sql = `WITH cte_likes AS ( SELECT postid, COUNT(*) AS total_likes FROM postlike GROUP BY postid), cte_comments AS (SELECT postId, COUNT(*) as total_comments FROM Comment GROUP BY postId) SELECT ${postFileds}, ${userFields}, coalesce(l.total_likes, 0) AS likes, coalesce(c.total_comments, 0) AS comments, EXISTS(SELECT * FROM postlike pl JOIN useraccount u ON u.id = pl.userid AND pl.postid = p.id WHERE u.id = $1) AS liked, EXISTS(SELECT userId FROM SavedPost sp JOIN useraccount u on p.id = sp.postId AND u.id = sp.userId  WHERE u.id = $1) as saved FROM post p LEFT JOIN cte_likes l ON p.id = l.postid LEFT JOIN cte_comments c ON p.id = c.postId LEFT JOIN useraccount u ON u.id = p.userid ORDER BY p.createdAt DESC`
+      const sql = `WITH cte_likes AS (SELECT postid, COUNT(userId) AS total_likes FROM postlike GROUP BY postid), cte_comments AS (SELECT postId, COUNT(userId) as total_comments FROM Comment GROUP BY postId) SELECT ${postFileds}, ${userFields}, coalesce(l.total_likes, 0) AS likes, coalesce(c.total_comments, 0) AS comments, EXISTS(SELECT pl.userId FROM postlike pl WHERE pl.postid = p.id AND pl.userId = $1) AS liked, EXISTS(SELECT userId FROM SavedPost sp WHERE sp.postid = p.id AND sp.userId = $1) as saved FROM post p LEFT JOIN cte_likes l ON p.id = l.postid LEFT JOIN cte_comments c ON p.id = c.postId LEFT JOIN useraccount u ON u.id = p.userid ORDER BY p.createdAt DESC`
       const result = await db.query(sql, [userId])
       const posts = result.rows
       return posts.map(mapPost)
@@ -37,9 +37,15 @@ export default function postsModel(db: Pool) {
 
     getPost: async function (id: string, userId: number) {
       // temp solution; need revisit
-      const sql = `WITH cte_likes AS ( SELECT postid, COUNT(*) AS total_likes FROM postlike GROUP BY postid), cte_comments AS (SELECT postId, COUNT(*) as total_comments FROM Comment GROUP BY postId) SELECT ${postFileds}, ${userFields}, coalesce(l.total_likes, 0) AS likes, coalesce(c.total_comments, 0) as comments, EXISTS(SELECT * FROM postlike pl JOIN useraccount u ON u.id = pl.userid AND pl.postid = p.id WHERE u.id = $1) AS liked, EXISTS(SELECT userId FROM SavedPost sp JOIN useraccount u on p.id = sp.postId AND u.id = sp.userId  WHERE u.id = $1) as saved FROM post p LEFT JOIN cte_likes l ON p.id = l.postid LEFT JOIN cte_comments c ON p.id = c.postId LEFT JOIN useraccount u ON u.id = p.userid WHERE p.id = $2`
+      const sql = `WITH cte_likes AS (SELECT postid, COUNT(userId) AS total_likes FROM postlike GROUP BY postid), cte_comments AS (SELECT postId, COUNT(userId) as total_comments FROM Comment GROUP BY postId) SELECT ${postFileds}, ${userFields}, coalesce(l.total_likes, 0) AS likes, coalesce(c.total_comments, 0) as comments, EXISTS(SELECT pl.userId FROM postlike pl WHERE pl.postId = p.id AND pl.userId = $1) AS liked, EXISTS(SELECT userId FROM SavedPost sp WHERE sp.postId = p.id AND sp.userId = $1) as saved FROM post p LEFT JOIN cte_likes l ON p.id = l.postid LEFT JOIN cte_comments c ON p.id = c.postId LEFT JOIN useraccount u ON u.id = p.userid WHERE p.id = $2`
       const result = await db.query(sql, [userId, id])
       return result.rows.map(mapPost)[0]
+    },
+
+    getUserPosts: async function (userId: number, username: string) {
+      const sql = `WITH cte_likes AS (SELECT postId, COUNT(userId) AS total_likes FROM postlike GROUP BY postId), cte_comments AS (SELECT postid, COUNT(userId) as total_comments FROM Comment GROUP BY postid) SELECT ${postFileds}, ${userFields}, coalesce(l.total_likes, 0) AS likes, coalesce(c.total_comments, 0) AS comments, EXISTS(SELECT pl.userId FROM postlike pl WHERE pl.userid = $1 AND pl.postId = p.id) AS liked, EXISTS(SELECT userId FROM SavedPost sp WHERE sp.userid = $1 AND sp.postid = p.id) as saved FROM post p LEFT JOIN cte_likes l ON p.id = l.postid LEFT JOIN cte_comments c ON p.id = c.postId LEFT JOIN useraccount u ON u.id = p.userid WHERE u.username = $2`
+      const { rows } = await db.query(sql, [userId, username])
+      return rows.map(mapPost)
     },
 
     createPost: async function (userId: number, post: PostBase) {

@@ -122,6 +122,24 @@ const posts: FastifyPluginCallback<Config> = (server, options, done) => {
     }
   })
 
+  server.route({
+    method: 'GET',
+    url: options.prefix + 'posts/:username/all',
+    handler: async (req, reply) => {
+      const username: string = (req.params as any).username
+      const posts = await model.getUserPosts(username, req.session.userId)
+      return { posts }
+    }
+  })
+
+  server.route({
+    method: 'GET',
+    url: options.prefix + 'posts/:username/likes',
+    handler: async (req, reply) => {
+      const username: string = (req.params as any).username
+    }
+  })
+
   done()
 }
 

@@ -1,5 +1,5 @@
 import S from 'fluent-json-schema'
-import { Profile } from '../posts/schema'
+import { Profile } from '../profiles/schema'
 
 const Comment = S.object()
   .prop('id', S.number().required())

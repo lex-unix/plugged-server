@@ -1,6 +1,10 @@
 import fp from 'fastify-plugin'
 import session from '@fastify/session'
-import { FastifyPluginCallback } from 'fastify'
+import type {
+  FastifyPluginCallback,
+  FastifyReply,
+  FastifyRequest
+} from 'fastify'
 import { type Config } from '../../config/config'
 import { Redis } from 'ioredis'
 import { RedisStore } from '../../../utils/store'
@@ -26,6 +30,15 @@ const redisSession: FastifyPluginCallback<Config> = (server, config, done) => {
         process.env.NODE_ENV === 'production' ? 'kyivangels.com' : undefined
     }
   })
+
+  server.decorate(
+    'authorize',
+    async (req: FastifyRequest, reply: FastifyReply) => {
+      if (!req.session.userId) {
+        return reply.code(401).send({ message: 'User is not logged in' })
+      }
+    }
+  )
 
   done()
 }

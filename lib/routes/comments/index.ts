@@ -31,6 +31,7 @@ const comments: FastifyPluginCallback<Config> = (server, options, done) => {
     method: 'POST',
     url: options.prefix + 'posts/:slug/comments',
     schema: schema.insert,
+    onRequest: [server.authorize],
     handler: async (req, reply) => {
       const comment = await model.createComment(
         req.session.userId,
@@ -46,6 +47,7 @@ const comments: FastifyPluginCallback<Config> = (server, options, done) => {
   server.route<DeleteCommentRoute>({
     method: 'DELETE',
     url: options.prefix + 'posts/:slug/comments/:id',
+    onRequest: [server.authorize],
     handler: async (req, reply) => {
       await model.deleteComment(req.session.userId, req.params.id)
       reply.code(204)
@@ -55,6 +57,7 @@ const comments: FastifyPluginCallback<Config> = (server, options, done) => {
   server.route<LikeCommentRoute>({
     method: 'POST',
     url: options.prefix + 'posts/:slug/comments/:id/like',
+    onRequest: [server.authorize],
     handler: async (req, reply) => {
       await model.likeComment(req.session.userId, req.params.id)
       reply.code(201)
@@ -64,6 +67,7 @@ const comments: FastifyPluginCallback<Config> = (server, options, done) => {
   server.route<LikeCommentRoute>({
     method: 'DELETE',
     url: options.prefix + 'posts/:slug/comments/:id/like',
+    onRequest: [server.authorize],
     handler: async (req, reply) => {
       await model.dislikeComment(req.session.userId, req.params.id)
       reply.code(204)
@@ -73,6 +77,7 @@ const comments: FastifyPluginCallback<Config> = (server, options, done) => {
   server.route<SaveCommentRoute>({
     method: 'POST',
     url: options.prefix + 'posts/:slug/comments/:id/save',
+    onRequest: [server.authorize],
     handler: async (req, reply) => {
       await model.saveComment(req.session.userId, req.params.id)
       reply.code(201)
@@ -82,6 +87,7 @@ const comments: FastifyPluginCallback<Config> = (server, options, done) => {
   server.route<SaveCommentRoute>({
     method: 'DELETE',
     url: options.prefix + 'posts/:slug/comments/:id/save',
+    onRequest: [server.authorize],
     handler: async (req, reply) => {
       await model.unsaveComment(req.session.userId, req.params.id)
       reply.code(204)

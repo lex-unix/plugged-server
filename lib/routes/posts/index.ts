@@ -43,11 +43,7 @@ const posts: FastifyPluginCallback<Config> = (server, options, done) => {
     method: 'POST',
     url: options.prefix + 'posts',
     schema: schema.insert,
-    onRequest: async (req, reply) => {
-      if (!req.session.userId) {
-        reply.code(401).send({ message: 'You must be logged in' })
-      }
-    },
+    onRequest: [server.authorize],
     handler: async (req, reply) => {
       const post = await model.createPost(req.session.userId, req.body.post)
       reply.code(201)
@@ -58,6 +54,7 @@ const posts: FastifyPluginCallback<Config> = (server, options, done) => {
   server.route<DeletePostRoute>({
     method: 'DELETE',
     url: options.prefix + 'posts/:id',
+    onRequest: [server.authorize],
     handler: async (req, reply) => {
       const id = req.params.id
       const post = await model.getPost(id, req.session.userId)
@@ -71,11 +68,7 @@ const posts: FastifyPluginCallback<Config> = (server, options, done) => {
   server.route<LikePostRoute>({
     method: 'POST',
     url: options.prefix + 'posts/:id/like',
-    onRequest: async (req, reply) => {
-      if (!req.session.userId) {
-        return reply.code(401).send({ message: 'You must be logged in' })
-      }
-    },
+    onRequest: [server.authorize],
     handler: async req => {
       await model.likePost(req.params.id, req.session.userId)
     }
@@ -84,11 +77,7 @@ const posts: FastifyPluginCallback<Config> = (server, options, done) => {
   server.route<LikePostRoute>({
     method: 'DELETE',
     url: options.prefix + 'posts/:id/like',
-    onRequest: async (req, reply) => {
-      if (!req.session.userId) {
-        return reply.code(401).send({ message: 'You must be logged in' })
-      }
-    },
+    onRequest: [server.authorize],
     handler: async req => {
       await model.dislikePost(req.params.id, req.session.userId)
     }
@@ -97,11 +86,7 @@ const posts: FastifyPluginCallback<Config> = (server, options, done) => {
   server.route<SavePostRoute>({
     method: 'POST',
     url: options.prefix + 'posts/:id/save',
-    onRequest: async (req, reply) => {
-      if (!req.session.userId) {
-        return reply.code(401).send({ message: 'You must be logged in' })
-      }
-    },
+    onRequest: [server.authorize],
     handler: async (req, reply) => {
       await model.savePost(req.params.id, req.session.userId)
       reply.code(204)
@@ -111,11 +96,7 @@ const posts: FastifyPluginCallback<Config> = (server, options, done) => {
   server.route<SavePostRoute>({
     method: 'DELETE',
     url: options.prefix + 'posts/:id/save',
-    onRequest: async (req, reply) => {
-      if (!req.session.userId) {
-        return reply.code(401).send({ message: 'You must be logged in' })
-      }
-    },
+    onRequest: [server.authorize],
     handler: async (req, reply) => {
       await model.unsavePost(req.params.id, req.session.userId)
       reply.code(204)

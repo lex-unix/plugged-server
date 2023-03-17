@@ -5,6 +5,7 @@ declare module 'fastify' {
   interface FastifyInstance {
     db: Pool
     storage: StorageClient
+    authorize: (req: FastifyRequest, reply: FastifyReply) => void
   }
 
   interface Session {

@@ -34,6 +34,24 @@ const login = {
   }
 }
 
+const update = {
+  body: S.object().prop(
+    'user',
+    S.object()
+      .prop('username', S.string().required())
+      .prop('firstname', S.string().required())
+      .prop('lastname', S.string().required())
+      .prop('email', S.string().required())
+  ),
+  response: {
+    200: S.object().prop('user', User),
+    404: S.object().prop('message', S.string()),
+    409: S.object()
+      .prop('message', S.string().required())
+      .prop('field', S.string().required())
+  }
+}
+
 const upload = {
   query: S.object().prop('userId', S.string().required()),
   response: {
@@ -44,5 +62,6 @@ const upload = {
 export const schema = {
   register,
   login,
-  upload
+  upload,
+  update
 }

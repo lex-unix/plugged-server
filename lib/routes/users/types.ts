@@ -22,3 +22,14 @@ export interface UploadRoute {
     id: string
   }
 }
+
+export interface UpdateRoute {
+  Body: {
+    user: {
+      username: string
+      firstname: string
+      lastname: string
+      email: string
+    }
+  }
+}

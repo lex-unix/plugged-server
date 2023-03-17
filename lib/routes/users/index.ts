@@ -4,7 +4,12 @@ import { schema } from './schema'
 import fp from 'fastify-plugin'
 import * as argon2 from 'argon2'
 import usersModel from '../../models/users'
-import type { RegisterRoute, LoginRoute, UploadRoute } from './types'
+import type {
+  RegisterRoute,
+  LoginRoute,
+  UploadRoute,
+  UpdateRoute
+} from './types'
 
 const users: FastifyPluginCallback<Config> = (server, options, done) => {
   const model = usersModel(server.db)
@@ -93,6 +98,51 @@ const users: FastifyPluginCallback<Config> = (server, options, done) => {
       const user = await model.getUserById(req.session.userId)
 
       return { user }
+    }
+  })
+
+  server.route<UpdateRoute>({
+    method: 'PUT',
+    url: options.prefix + 'user',
+    schema: schema.update,
+    onRequest: [server.authorize],
+    handler: async (req, reply) => {
+      const user = req.body.user
+      const oldUser = await model.getUserById(req.session.userId)
+      if (!oldUser) {
+        return reply.code(404).send({ message: 'User not found' })
+      }
+
+      const promises = [
+        model.getUserByUsername(user.username),
+        model.getUserByEmail(user.email)
+      ]
+      const [isExistingUsername, isExistingEmail] = await Promise.allSettled(
+        promises
+      )
+      if (
+        isExistingUsername.status === 'fulfilled' &&
+        isExistingUsername.value
+      ) {
+        const isSameUser = isExistingUsername.value.id === req.session.userId
+        if (!isSameUser) {
+          return reply
+            .code(409)
+            .send({ message: 'Username already taken', field: 'username' })
+        }
+      }
+      if (isExistingEmail.status === 'fulfilled' && isExistingEmail.value) {
+        const isSameUser = isExistingEmail.value.id === req.session.userId
+        if (!isSameUser) {
+          return reply.code(409).send({
+            message: 'This email is associated with another account',
+            field: 'email'
+          })
+        }
+      }
+
+      const newUser = await model.updateUser(user, req.session.userId)
+      return { user: newUser }
     }
   })
 

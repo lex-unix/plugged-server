@@ -53,6 +53,19 @@ export default function usersModel(db: Pool) {
     addUserAvatar: async function (id: string, url: string) {
       const sql = 'UPDATE UserAccount SET avatar = $1 WHERE id = $2'
       await db.query(sql, [url, id])
+    },
+
+    updateUser: async function (user: UserBase, userId: number) {
+      const values = [
+        user.username,
+        user.firstname,
+        user.lastname,
+        user.email,
+        userId
+      ]
+      const sql = `UPDATE UserAccount SET username = $1, firstname = $2, lastname = $3, email = $4 WHERE id = $5 RETURNING *`
+      const { rows } = await db.query(sql, values)
+      return rows[0]
     }
   }
 }

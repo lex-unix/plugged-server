@@ -2,7 +2,7 @@ import S from 'fluent-json-schema'
 import { Profile } from '../profiles/schema'
 
 const Post = S.object()
-  .prop('id', S.string().required())
+  .prop('id', S.number().required())
   .prop('title', S.string().required())
   .prop('body', S.string().required())
   .prop('likes', S.number().required())

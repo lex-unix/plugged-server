@@ -1,3 +1,5 @@
+import * as fs from 'node:fs'
+import { pipeline } from 'node:stream'
 import type { FastifyPluginCallback } from 'fastify'
 import type { Config } from '../../config/config'
 import { schema } from './schema'
@@ -163,10 +165,9 @@ const users: FastifyPluginCallback<Config> = (server, options, done) => {
           .send({ message: `${subtype} files are not supported` })
       }
 
-      const buffer = await data.toBuffer()
       const { data: imageData, error } = await server.storage
         .from('avatar')
-        .upload(`${req.params.id}/avatar.${subtype}`, buffer, {
+        .upload(`${req.params.id}/avatar.${subtype}`, data.file, {
           contentType: data.mimetype,
           upsert: true
         })
